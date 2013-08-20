@@ -6,7 +6,7 @@ int main(int argc, char **argv)
     print(@"Usage: gif MOVIE_FILE")
     return 1
 
-  String filename = NSString.stringWithUTF8String: argv[1]
+  String filename = String.stringWithUTF8String: argv[1]
   print(@"filename = %@", filename)
 
   return 0

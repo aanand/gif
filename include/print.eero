@@ -1,7 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <stdio.h>
 
-void print(NSString *format, ...)
+void print(String *format, ...)
   if !format
     return
 
