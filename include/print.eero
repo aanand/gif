@@ -1,0 +1,15 @@
+#import <Foundation/Foundation.h>
+#import <stdio.h>
+
+void print(NSString *format, ...)
+  if !format
+    return
+
+  va_list arguments
+  va_start(arguments, format)
+
+  String str = String.alloc
+  str = str.initWithFormat: format, arguments: arguments
+  printf("%s\n", str.cStringUsingEncoding:UTF8StringEncoding)
+
+  va_end(arguments)
