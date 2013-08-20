@@ -50,6 +50,9 @@ implementation FrameReader
     size_t width = CVPixelBufferGetWidth(imageBuffer)
     size_t height = CVPixelBufferGetHeight(imageBuffer)
 
+    if bytesPerRow == 0
+      return nil
+
     void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer)
     size_t bufferSize = CVPixelBufferGetDataSize(imageBuffer)
 
