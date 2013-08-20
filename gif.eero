@@ -27,13 +27,19 @@ int main(int argc, char **argv)
     }
   }
 
+  frameProperties := {
+    (__bridge id)kCGImagePropertyGIFDictionary: {
+      (__bridge id)kCGImagePropertyGIFDelayTime: @0.04f
+    }
+  }
+
   String destPath = @"out.gif"
   CFURLRef destURL = (CFURLRef)NSURL.fileURLWithPath: destPath
   CGImageDestinationRef destination = CGImageDestinationCreateWithURL(destURL, kUTTypeGIF, frames.count, NULL)
   CGImageDestinationSetProperties(destination, (__bridge CFDictionaryRef)fileProperties)
 
   for id frame in frames
-    CGImageDestinationAddImage(destination, (CGImageRef)frame, NULL)
+    CGImageDestinationAddImage(destination, (CGImageRef)frame, (__bridge CFDictionaryRef)frameProperties)
 
   bool success = CGImageDestinationFinalize(destination)
   print(@"success = %d", success)
