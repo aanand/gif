@@ -1,0 +1,65 @@
+#import <Foundation/Foundation.h>
+
+interface FrameReader
+  + readerWithURL: URL, return instancetype
+  hasMore, return BOOL
+  nextFrame, return CGImageRef
+
+  AVAssetReader reader {strong, nonatomic}
+  AVAssetReaderOutput output {strong, nonatomic}
+end
+
+implementation FrameReader
+  + readerWithURL: URL url, return instancetype
+    return (self.alloc).initWithURL: url
+
+  initWithURL: URL url, return instancetype
+    if (self = super.init)
+      AVAsset asset = (AVURLAsset.alloc).initWithURL: url, options: nil
+
+      Error error = nil
+      self.reader = (AVAssetReader.alloc).initWithAsset: asset, error: &error
+
+      Array videoTracks = asset.tracksWithMediaType: AVMediaTypeVideo
+      AVAssetTrack videoTrack = videoTracks[0]
+      Dictionary options = Dictionary.dictionaryWithObject:@(kCVPixelFormatType_32BGRA), forKey:(id)kCVPixelBufferPixelFormatTypeKey
+      self.output = (AVAssetReaderTrackOutput.alloc).initWithTrack: videoTrack, outputSettings: options
+
+      self.reader.addOutput: self.output
+      self.reader.startReading
+
+    return self
+
+  hasMore, return BOOL
+    return (void*)self.reader.status == (void*)AVAssetReaderStatusReading
+
+  nextFrame, return CGImageRef
+    static CGColorSpaceRef colorSpace = NULL
+    if colorSpace == NULL
+      colorSpace = CGColorSpaceCreateDeviceRGB()
+      if colorSpace == NULL
+        Log(@"Failed to create color space")
+        exit(255)
+
+    CMSampleBufferRef sampleBuffer = self.output.copyNextSampleBuffer
+
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+    CVPixelBufferLockBaseAddress(imageBuffer,0)
+
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer)
+    size_t width = CVPixelBufferGetWidth(imageBuffer)
+    size_t height = CVPixelBufferGetHeight(imageBuffer)
+
+    void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer)
+    size_t bufferSize = CVPixelBufferGetDataSize(imageBuffer)
+
+    CGDataProviderRef dataProvider =
+      CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL)
+
+    CGImageRef cgImage =
+      CGImageCreate(width, height, 8, 32, bytesPerRow,
+        colorSpace, kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little,
+        dataProvider, NULL, true, kCGRenderingIntentDefault)
+
+    return cgImage
+end
