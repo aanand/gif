@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 #import 'print.eero'
 
 int main(int argc, char **argv)
@@ -6,7 +7,62 @@ int main(int argc, char **argv)
     print(@"Usage: gif MOVIE_FILE")
     return 1
 
-  String filename = String.stringWithUTF8String: argv[1]
-  print(@"filename = %@", filename)
+  String path   = String.stringWithUTF8String: argv[1]
+  URL url       = URL.fileURLWithPath: path
+  AVAsset asset = (AVURLAsset.alloc).initWithURL: url, options: nil
+
+  Error error = nil
+  AVAssetReader reader = (AVAssetReader.alloc).initWithAsset: asset, error: &error
+
+  Array videoTracks = asset.tracksWithMediaType: AVMediaTypeVideo
+  AVAssetTrack videoTrack = videoTracks[0]
+  Dictionary options = Dictionary.dictionaryWithObject:@(kCVPixelFormatType_32BGRA), forKey:(id)kCVPixelBufferPixelFormatTypeKey
+  AVAssetReaderOutput output = (AVAssetReaderTrackOutput.alloc).initWithTrack: videoTrack, outputSettings: options
+
+  reader.addOutput: output
+  reader.startReading
+
+  CMSampleBufferRef sampleBuffer
+
+  static CGColorSpaceRef colorSpace = NULL
+  if colorSpace == NULL
+   colorSpace = CGColorSpaceCreateDeviceRGB()
+   if colorSpace == NULL
+    print(@"Failed to create color space")
+    return 255
+
+  while (void*)reader.status == (void*)AVAssetReaderStatusReading
+    sampleBuffer = output.copyNextSampleBuffer
+
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+    CVPixelBufferLockBaseAddress(imageBuffer,0)
+
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer)
+    size_t width = CVPixelBufferGetWidth(imageBuffer)
+    size_t height = CVPixelBufferGetHeight(imageBuffer)
+
+    void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer)
+    size_t bufferSize = CVPixelBufferGetDataSize(imageBuffer)
+
+    CGDataProviderRef dataProvider =
+      CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL)
+
+    CGImageRef cgImage =
+      CGImageCreate(width, height, 8, 32, bytesPerRow,
+        colorSpace, kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little,
+        dataProvider, NULL, true, kCGRenderingIntentDefault)
+
+    CGDataProviderRelease(dataProvider)
+
+    print(@"w=%d, h=%d", CGImageGetWidth(cgImage), CGImageGetHeight(cgImage))
+
+    String destPath = @"out.png"
+    CFURLRef destURL = (CFURLRef)NSURL.fileURLWithPath: destPath
+    CGImageDestinationRef destination = CGImageDestinationCreateWithURL(destURL, kUTTypePNG, 1, NULL)
+    CGImageDestinationAddImage(destination, cgImage, NULL)
+    bool success = CGImageDestinationFinalize(destination)
+
+    print(@"success = %d", success)
+    return 0
 
   return 0
