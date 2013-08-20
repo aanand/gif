@@ -1,0 +1,46 @@
+interface GifWriter
+  + writer, return instancetype
+
+  addFrame: CGImageRef frame
+  writeToURL: URL, return BOOL
+
+  Number frameDelay {strong}
+end
+
+implementation GifWriter
+  NSMutableArray frames
+
+  + writer, return instancetype
+    return (self.alloc).init
+
+  init, return instancetype
+    if (self = super.init)
+      frames = []
+      self.frameDelay = @0.04f
+
+    return self
+
+  addFrame: CGImageRef frame
+    frames.addObject: (id)frame
+
+  writeToURL: URL url, return BOOL
+    fileProperties := {
+      (__bridge id)kCGImagePropertyGIFDictionary: {
+        (__bridge id)kCGImagePropertyGIFLoopCount: @0
+      }
+    }
+
+    frameProperties := {
+      (__bridge id)kCGImagePropertyGIFDictionary: {
+        (__bridge id)kCGImagePropertyGIFDelayTime: self.frameDelay
+      }
+    }
+
+    CGImageDestinationRef destination = CGImageDestinationCreateWithURL((CFURLRef)url, kUTTypeGIF, frames.count, NULL)
+    CGImageDestinationSetProperties(destination, (__bridge CFDictionaryRef)fileProperties)
+
+    for id frame in frames
+      CGImageDestinationAddImage(destination, (CGImageRef)frame, (__bridge CFDictionaryRef)frameProperties)
+
+    return CGImageDestinationFinalize(destination)
+end

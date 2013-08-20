@@ -3,6 +3,7 @@
 
 #import 'print.eero'
 #import 'FrameReader.eero'
+#import 'GifWriter.eero'
 
 int main(int argc, char **argv)
   if argc < 2
@@ -13,35 +14,17 @@ int main(int argc, char **argv)
   URL url       = URL.fileURLWithPath: path
 
   FrameReader reader = FrameReader.readerWithURL: url
-  NSMutableArray frames = []
+  GifWriter writer   = GifWriter.writer
 
   while reader.hasMore
     CGImageRef frame = reader.nextFrame
     if frame
       print(@"adding frame")
-      frames.addObject: (id)frame
+      writer.addFrame: frame
 
-  fileProperties := {
-    (__bridge id)kCGImagePropertyGIFDictionary: {
-      (__bridge id)kCGImagePropertyGIFLoopCount: @0
-    }
-  }
+  URL destURL = NSURL.fileURLWithPath: @"out.gif"
 
-  frameProperties := {
-    (__bridge id)kCGImagePropertyGIFDictionary: {
-      (__bridge id)kCGImagePropertyGIFDelayTime: @0.04f
-    }
-  }
-
-  String destPath = @"out.gif"
-  CFURLRef destURL = (CFURLRef)NSURL.fileURLWithPath: destPath
-  CGImageDestinationRef destination = CGImageDestinationCreateWithURL(destURL, kUTTypeGIF, frames.count, NULL)
-  CGImageDestinationSetProperties(destination, (__bridge CFDictionaryRef)fileProperties)
-
-  for id frame in frames
-    CGImageDestinationAddImage(destination, (CGImageRef)frame, (__bridge CFDictionaryRef)frameProperties)
-
-  bool success = CGImageDestinationFinalize(destination)
+  BOOL success = writer.writeToURL: destURL
   print(@"success = %d", success)
 
   return 0
