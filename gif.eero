@@ -13,18 +13,22 @@ int main(int argc, char **argv)
   URL url       = URL.fileURLWithPath: path
 
   FrameReader reader = FrameReader.readerWithURL: url
+  NSMutableArray frames = []
 
   while reader.hasMore
-    CGImageRef cgImage = reader.nextFrame
-    print(@"w=%d, h=%d", CGImageGetWidth(cgImage), CGImageGetHeight(cgImage))
+    CGImageRef frame = reader.nextFrame
+    if frame
+      print(@"adding frame")
+      frames.addObject: (id)frame
 
-    String destPath = @"out.png"
-    CFURLRef destURL = (CFURLRef)NSURL.fileURLWithPath: destPath
-    CGImageDestinationRef destination = CGImageDestinationCreateWithURL(destURL, kUTTypePNG, 1, NULL)
-    CGImageDestinationAddImage(destination, cgImage, NULL)
-    bool success = CGImageDestinationFinalize(destination)
+  String destPath = @"out.gif"
+  CFURLRef destURL = (CFURLRef)NSURL.fileURLWithPath: destPath
+  CGImageDestinationRef destination = CGImageDestinationCreateWithURL(destURL, kUTTypeGIF, frames.count, NULL)
 
-    print(@"success = %d", success)
-    return 0
+  for id frame in frames
+    CGImageDestinationAddImage(destination, (CGImageRef)frame, NULL)
+
+  bool success = CGImageDestinationFinalize(destination)
+  print(@"success = %d", success)
 
   return 0
