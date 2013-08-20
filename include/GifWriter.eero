@@ -36,7 +36,7 @@ implementation GifWriter
       }
     }
 
-    CGImageDestinationRef destination = CGImageDestinationCreateWithURL((CFURLRef)url, kUTTypeGIF, frames.count, NULL)
+    destination := CGImageDestinationCreateWithURL((CFURLRef)url, kUTTypeGIF, frames.count, NULL)
     CGImageDestinationSetProperties(destination, (__bridge CFDictionaryRef)fileProperties)
 
     for id frame in frames

@@ -15,12 +15,12 @@ implementation VideoReader
 
   initWithURL: URL url, return instancetype
     if (self = super.init)
-      AVAsset asset = (AVURLAsset.alloc).initWithURL: url, options: nil
+      asset := (AVURLAsset.alloc).initWithURL: url, options: nil
 
       Error error = nil
       self.reader = (AVAssetReader.alloc).initWithAsset: asset, error: &error
 
-      Array videoTracks = asset.tracksWithMediaType: AVMediaTypeVideo
+      videoTracks := asset.tracksWithMediaType: AVMediaTypeVideo
       AVAssetTrack videoTrack = videoTracks[0]
       Dictionary options = Dictionary.dictionaryWithObject:@(kCVPixelFormatType_32BGRA), forKey:(id)kCVPixelBufferPixelFormatTypeKey
       self.output = (AVAssetReaderTrackOutput.alloc).initWithTrack: videoTrack, outputSettings: options
@@ -41,25 +41,25 @@ implementation VideoReader
         Log(@"Failed to create color space")
         exit(255)
 
-    CMSampleBufferRef sampleBuffer = self.output.copyNextSampleBuffer
+    sampleBuffer := self.output.copyNextSampleBuffer
 
-    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
+    imageBuffer := CMSampleBufferGetImageBuffer(sampleBuffer)
     CVPixelBufferLockBaseAddress(imageBuffer,0)
 
-    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer)
-    size_t width = CVPixelBufferGetWidth(imageBuffer)
-    size_t height = CVPixelBufferGetHeight(imageBuffer)
+    bytesPerRow := CVPixelBufferGetBytesPerRow(imageBuffer)
+    width       := CVPixelBufferGetWidth(imageBuffer)
+    height      := CVPixelBufferGetHeight(imageBuffer)
 
     if bytesPerRow == 0
       return nil
 
-    void *baseAddress = CVPixelBufferGetBaseAddress(imageBuffer)
-    size_t bufferSize = CVPixelBufferGetDataSize(imageBuffer)
+    baseAddress := CVPixelBufferGetBaseAddress(imageBuffer)
+    bufferSize  := CVPixelBufferGetDataSize(imageBuffer)
 
-    CGDataProviderRef dataProvider =
+    dataProvider :=
       CGDataProviderCreateWithData(NULL, baseAddress, bufferSize, NULL)
 
-    CGImageRef cgImage =
+    cgImage :=
       CGImageCreate(width, height, 8, 32, bytesPerRow,
         colorSpace, kCGImageAlphaNoneSkipFirst | kCGBitmapByteOrder32Little,
         dataProvider, NULL, true, kCGRenderingIntentDefault)

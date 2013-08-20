@@ -13,18 +13,18 @@ int main(int argc, char **argv)
   String path   = String.stringWithUTF8String: argv[1]
   URL url       = URL.fileURLWithPath: path
 
-  VideoReader reader = VideoReader.readerWithURL: url
-  GifWriter writer   = GifWriter.writer
+  reader := VideoReader.readerWithURL: url
+  writer := GifWriter.writer
 
   while reader.hasMore
-    CGImageRef frame = reader.nextFrame
+    frame := reader.nextFrame
     if frame
       print(@"adding frame")
       writer.addFrame: frame
 
   URL destURL = NSURL.fileURLWithPath: @"out.gif"
 
-  BOOL success = writer.writeToURL: destURL
+  success := writer.writeToURL: destURL
   print(@"success = %d", success)
 
   return 0
