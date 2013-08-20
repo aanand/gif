@@ -3,7 +3,7 @@
 
 int main(int argc, char **argv)
   if argc < 2
-    print(@"Usage: gif MOVIE_FILE\n")
+    print(@"Usage: gif MOVIE_FILE")
     return 1
 
   String filename = NSString.stringWithUTF8String: argv[1]
