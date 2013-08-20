@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-interface FrameReader
+interface VideoReader
   + readerWithURL: URL, return instancetype
   hasMore, return BOOL
   nextFrame, return CGImageRef
@@ -9,7 +9,7 @@ interface FrameReader
   AVAssetReaderOutput output {strong, nonatomic}
 end
 
-implementation FrameReader
+implementation VideoReader
   + readerWithURL: URL url, return instancetype
     return (self.alloc).initWithURL: url
 

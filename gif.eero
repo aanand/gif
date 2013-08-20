@@ -2,7 +2,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 #import 'print.eero'
-#import 'FrameReader.eero'
+#import 'VideoReader.eero'
 #import 'GifWriter.eero'
 
 int main(int argc, char **argv)
@@ -13,7 +13,7 @@ int main(int argc, char **argv)
   String path   = String.stringWithUTF8String: argv[1]
   URL url       = URL.fileURLWithPath: path
 
-  FrameReader reader = FrameReader.readerWithURL: url
+  VideoReader reader = VideoReader.readerWithURL: url
   GifWriter writer   = GifWriter.writer
 
   while reader.hasMore
