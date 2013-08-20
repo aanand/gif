@@ -5,13 +5,23 @@
 #import 'VideoReader.eero'
 #import 'GifWriter.eero'
 
+void banner()
+  puts("Usage: gif MOVIE_FILE")
+  puts("Create an animated gif from the specified movie file and write it to `out.gif`.")
+  puts("")
+
 int main(int argc, char **argv)
-  if argc < 2
-    puts("Usage: gif MOVIE_FILE")
+  if argc != 2
+    banner()
     return 1
 
-  String path   = String.stringWithUTF8String: argv[1]
-  URL url       = URL.fileURLWithPath: path
+  String path = String.stringWithUTF8String: argv[1]
+
+  if path == @"--help" || path == @"-h"
+    banner()
+    return 0
+
+  URL url = URL.fileURLWithPath: path
 
   reader := VideoReader.readerWithURL: url
   writer := GifWriter.writer
