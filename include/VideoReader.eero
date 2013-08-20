@@ -4,12 +4,12 @@ interface VideoReader
   + readerWithURL: URL, return instancetype
   hasMore, return BOOL
   nextFrame, return CGImageRef
-
-  AVAssetReader reader {strong, nonatomic}
-  AVAssetReaderOutput output {strong, nonatomic}
 end
 
 implementation VideoReader
+  AVAssetReader reader
+  AVAssetReaderOutput output
+
   + readerWithURL: URL url, return instancetype
     return (self.alloc).initWithURL: url
 
@@ -18,20 +18,20 @@ implementation VideoReader
       asset := (AVURLAsset.alloc).initWithURL: url, options: nil
 
       Error error = nil
-      self.reader = (AVAssetReader.alloc).initWithAsset: asset, error: &error
+      reader = (AVAssetReader.alloc).initWithAsset: asset, error: &error
 
       videoTracks := asset.tracksWithMediaType: AVMediaTypeVideo
       AVAssetTrack videoTrack = videoTracks[0]
       Dictionary options = Dictionary.dictionaryWithObject:@(kCVPixelFormatType_32BGRA), forKey:(id)kCVPixelBufferPixelFormatTypeKey
-      self.output = (AVAssetReaderTrackOutput.alloc).initWithTrack: videoTrack, outputSettings: options
+      output = (AVAssetReaderTrackOutput.alloc).initWithTrack: videoTrack, outputSettings: options
 
-      self.reader.addOutput: self.output
-      self.reader.startReading
+      reader.addOutput: output
+      reader.startReading
 
     return self
 
   hasMore, return BOOL
-    return (void*)self.reader.status == (void*)AVAssetReaderStatusReading
+    return (void*)reader.status == (void*)AVAssetReaderStatusReading
 
   nextFrame, return CGImageRef
     static CGColorSpaceRef colorSpace = NULL
@@ -41,7 +41,7 @@ implementation VideoReader
         Log(@"Failed to create color space")
         exit(255)
 
-    sampleBuffer := self.output.copyNextSampleBuffer
+    sampleBuffer := output.copyNextSampleBuffer
 
     imageBuffer := CMSampleBufferGetImageBuffer(sampleBuffer)
     CVPixelBufferLockBaseAddress(imageBuffer,0)
