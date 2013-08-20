@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv)
   if argc < 2
-    print(@"Usage: gif MOVIE_FILE")
+    puts("Usage: gif MOVIE_FILE")
     return 1
 
   String path   = String.stringWithUTF8String: argv[1]
@@ -19,12 +19,18 @@ int main(int argc, char **argv)
   while reader.hasMore
     frame := reader.nextFrame
     if frame
-      print(@"adding frame")
       writer.addFrame: frame
+      printf("\radded %ld frames", (long)writer.numFrames)
+      fflush(stdout)
+
+  printf("\nwriting...\n")
 
   URL destURL = NSURL.fileURLWithPath: @"out.gif"
 
   success := writer.writeToURL: destURL
-  print(@"success = %d", success)
 
-  return 0
+  if success
+    print(@"wrote to %@", destURL.path)
+    return 0
+  else
+    return 255

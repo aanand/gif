@@ -2,6 +2,7 @@ interface GifWriter
   + writer, return instancetype
 
   addFrame: CGImageRef frame
+  numFrames, return Integer
   writeToURL: URL, return BOOL
 
   Number frameDelay {strong}
@@ -22,6 +23,9 @@ implementation GifWriter
 
   addFrame: CGImageRef frame
     frames.addObject: (id)frame
+
+  numFrames, return Integer
+    return frames.count
 
   writeToURL: URL url, return BOOL
     fileProperties := {
